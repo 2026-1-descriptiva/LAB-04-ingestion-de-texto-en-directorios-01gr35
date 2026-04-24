@@ -71,3 +71,29 @@ def pregunta_01():
 
 
     """
+def pregunta_01():
+    import zipfile
+    import pandas as pd
+    from pathlib import Path
+
+    with zipfile.ZipFile("files/input.zip", 'r') as zip_ref:
+        zip_ref.extractall(".")
+
+    Path("files/output").mkdir(parents=True, exist_ok=True)
+
+    def procesar(carpeta):
+        datos = []
+        for sentimiento in ["negative", "positive", "neutral"]:
+            ruta = Path("input") / carpeta / sentimiento
+            if ruta.exists():
+                for archivo in ruta.glob("*.txt"):
+                    with open(archivo, 'r', encoding='utf-8') as f:
+                        frase = f.read().strip()
+                    datos.append({"phrase": frase, "target": sentimiento})
+        return pd.DataFrame(datos)
+
+    df_train = procesar("train")
+    df_test = procesar("test")
+
+    df_train.to_csv("files/output/train_dataset.csv", index=False)
+    df_test.to_csv("files/output/test_dataset.csv", index=False)
